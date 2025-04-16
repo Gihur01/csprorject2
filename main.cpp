@@ -86,9 +86,23 @@ struct BorrowRecord {
     string returnDate;
 };
 
+//--------------------------- HELPERS ---------------------------
+void displayInstructions() {
+    cout<<"Please write a number from the list below to use the function!"<<endl
+    <<"1: Check out an item"<<endl
+    <<"2: Check in an item"<<endl
+    <<"3: Exit"<<endl
+    ;
+}
+
+
+//------------------------------------------------------
 
 int main() {
+    while(true) {
+        displayInstructions();
 
+    }
 
     return 0;
 }
