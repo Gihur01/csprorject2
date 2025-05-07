@@ -3,6 +3,7 @@
 #include <vector>
 using namespace std;
 
+//--------------------------- ITEMS -----------------------------
 class Item {
 protected:
     string title;
@@ -30,7 +31,7 @@ public:
         cout << title << " checked in.\n";
     }
 
-    virtual ~Item() {} // Virtual destructor for proper cleanup
+    virtual ~Item() {} //
 };
 
 
@@ -99,10 +100,21 @@ void displayInstructions() {
 //------------------------------------------------------
 
 int main() {
+    int choice;
+    //check if the save files exist
+
     while(true) {
         displayInstructions();
+        cin>>choice;
+        switch (choice) {
+            case 1:
+
+        }
 
     }
-
     return 0;
+}
+
+void handleCheckOut() {
+
 }
