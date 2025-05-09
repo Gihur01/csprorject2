@@ -1,0 +1,7 @@
+class Magazine : public Item {
+    Magazine(string t, string a, string i) : Item(t, a, i) {}
+
+    void display() const override {
+        cout << "Magazine: " << title << " by " << author << "\n";
+    }
+};
