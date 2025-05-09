@@ -5,6 +5,7 @@
 #include <sstream>
 using namespace std;
 
+//--------------------------- ITEMS -----------------------------
 class Item {
 protected:
     string title;
@@ -63,15 +64,19 @@ public:
     }
 };
 
+class Magazine : public Item {
+    Magazine(string t, string a, string i) : Item(t, a, i) {}
 
+    void display() const override {
+        cout << "Magazine: " << title << " by " << author << "\n";
+    }
+};
 
 //--------------------------- ROLES -----------------------------
 
 class User {
     string name;
     int userID;
-    // vector<string> borrowedItemIDs;
-
 public:
     User(string n, int id) : name(n), userID(id) {}
 
