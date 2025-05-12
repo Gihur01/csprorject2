@@ -1,111 +1,55 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
 #include <sstream>
+#include <chrono>
+#include <format>
+
+#include "Item.h"
+#include "User.h"
 using namespace std;
-
-//--------------------------- ITEMS -----------------------------
-class Item {
-protected:
-    string title;
-    string author;
-    string itemID; //ISBN or ISSN depending on item type
-    bool isCheckedOut;
-
-public:
-    Item(string t, string a, string i) : title(t), author(a), itemID(i), isCheckedOut(false) {}
-
-    virtual void display() const = 0;
-    
-    virtual void checkOut() {
-        if (!isCheckedOut) {
-            isCheckedOut = true;
-            cout << title << " checked out.\n";
-        }
-        else {
-            cout << title << " is already checked out.\n";
-        }
-    }
-
-    virtual void checkIn() {
-        isCheckedOut = false;
-        cout << title << " checked in.\n";
-    }
-
-    string getTitle() const {return title;}
-    string getAuthor() const {return author;}
-    string getitemID() const {return itemID;}
-    bool isAvailable() const {return !isCheckedOut;}
-
-    virtual ~Item() {} // Virtual destructor for proper cleanup
-};
-
-
-class Book : public Item {
-public:
-    Book(string t, string a, string i)
-        : Item(t, a, i) {}
-
-    void display() const override {
-        cout << "Book: " << title << " by " << author << " (ISBN: " << itemID << ")\n";
-    }
-};
-
-class EBook : public Item {
-    string fileFormat;
-public:
-    EBook(string t, string a, string i, string format) : Item(t, a, i), fileFormat(format) {}
-
-    string getFormat() const {return fileFormat;}
-
-    void display() const override {
-        cout << "EBook: " << title << " by " << author << " (Format: " << fileFormat << ")\n";
-    }
-};
-
-class Magazine : public Item {
-    Magazine(string t, string a, string i) : Item(t, a, i) {}
-
-    void display() const override {
-        cout << "Magazine: " << title << " by " << author << "\n";
-    }
-};
-
-//--------------------------- ROLES -----------------------------
-
-class User {
-    string name;
-    int userID;
-public:
-    User(string n, int id) : name(n), userID(id) {}
-
-    void display() const {
-        cout << "User: " << name << " (ID: " << userID << ")\n";
-    }
-
-    string getName() const {return name;}
-    int getID() const {return userID;}
-};
 
 
 //--------------------------- RECORDS -----------------------------
 struct BorrowRecord {
     int userID;
-    string itemID;
+    string serialNum;
     string borrowDate;
     string returnDate;
+
+    BorrowRecord(int u, string s, string bd)
+        : userID(u),serialNum(s),borrowDate(bd){}
+
+    BorrowRecord(int u, string s, string bd, string rd)
+        : userID(u),serialNum(s),borrowDate(bd),returnDate(rd) {}
+    //Add some methods for sorting
 };
 
-//--------------------------- MODULES ---------------------------
-void displayInstructions() {
-    cout<<endl
-    <<"Please write a number from the list below to use the function!"<<endl
-    <<"1: Check out an item"<<endl
-    <<"2: Check in an item"<<endl
-    <<"3: Exit"<<endl
-    ;
+//--------------------------- HELPERS ---------------------------
+string getDate() {
+    auto now = std::chrono::system_clock::now();
+    std::string date_string = std::format("{:%Y-%m-%d}", now);
+    return date_string;
 }
+
+std::vector<BorrowRecord>::reverse_iterator findActiveRecordByUser(vector<BorrowRecord>& recordList, int userID) {
+    return std::find_if(recordList.rbegin(), recordList.rend(),
+        [&](const BorrowRecord& record) {
+            return record.userID == userID && record.returnDate.empty();
+        });
+}
+
+std::vector<BorrowRecord>::reverse_iterator findActiveRecordBySerial(vector<BorrowRecord>& recordList,const std::string& serialNum) {
+    return std::find_if(recordList.rbegin(), recordList.rend(),
+        [&](const BorrowRecord& record) {
+            return record.serialNum == serialNum && record.returnDate.empty();
+        });
+}
+
+//--------------------------- MODULES ---------------------------
+
 
 //saving & loading usewrs
 
@@ -137,15 +81,15 @@ unordered_map<int,User> loadUsers() {
 void saveItems(const std::unordered_map<std::string, Item*>& items) {
     std::ofstream outFile("itemdb.txt",fstream::out);
     for (const auto& [isbn, item] : items) {
-        // Identify type using dynamic_cast
+
         if (auto* book = dynamic_cast<Book*>(item)) {
-            outFile << "Book," << book->getitemID() << ","
+            outFile << "Book," << book->getSerialNum() << ","
             << book->getTitle()<< ","
             << book->getAuthor() << ","
             << book->isAvailable() << endl;
         }
         else if (auto* ebook = dynamic_cast<EBook*>(item)) {
-            outFile << "EBook," << ebook->getitemID() << ","
+            outFile << "EBook," << ebook->getSerialNum() << ","
             << ebook->getTitle()<< ","
             << ebook->getAuthor() << ","
             << ebook->getFormat()<< ","
@@ -165,28 +109,28 @@ std::unordered_map<string, Item*> loadItems() {
 
     while (std::getline(inFile, line)) {
         std::stringstream ss(line);
-        string type, isbn, title, author, format, availableStr;
+        string type, serial, title, author, publishDate, format, availableStr;
         bool available;
 
         std::getline(ss, type, ',');
-        std::getline(ss, isbn, ',');
+        std::getline(ss, serial, ',');
         std::getline(ss, title, ',');
         std::getline(ss, author, ',');
 
         if (type == "Book") {
             std::getline(ss, availableStr);
             available = (availableStr == "1");
-            auto* book = new Book(title, author, isbn);
+            auto* book = new Book(title, author, serial, publishDate);
             if (!available) book->checkOut(); //setting  available state
-            items[isbn] = book;
+            items[serial] = book;
         }
         else if (type == "EBook") {
             std::getline(ss, format, ',');
             std::getline(ss, availableStr);
             available = (availableStr == "1");
-            auto* ebook = new EBook(title, author, isbn, format);
+            auto* ebook = new EBook(title, author, serial, publishDate, format);
             if (!available) ebook->checkOut();
-            items[isbn] = ebook;
+            items[serial] = ebook;
         }
     }
 
@@ -196,52 +140,116 @@ std::unordered_map<string, Item*> loadItems() {
 
 
 int handleAddItem(unordered_map<string, Item*>& items) {
+    cout<<"Please select the type of the new item with 1,2,3:"<<endl
+    <<"1. Book"<<endl
+    <<"2. Ebook"<<endl
+    <<"3. Magazine"<<endl
+    ;
+    int type=0;
 
+    std::string line;
+    std::string segment;
+    string title, author, publishDate, serial;
+    char cont=0;
+
+    while(true) {
+        cont=0;
+        cin>>type;
+        if(type<=0 || type>3) {
+            cout<<"Invalid type! Please enter again";
+            continue;
+        }
+        cout<<"Please write the title, author, publish date and the serial number (separated by a comma)"<<endl;
+
+        std::getline(std::cin, line);
+        std::stringstream ss(line);
+
+        std::getline(ss, title, ',');
+        std::getline(ss, author, ',');
+        std::getline(ss, publishDate, ',');
+        std::getline(ss, serial, ',');
+
+        Item* item;
+        switch (type) {
+            case 1:
+                item= new Book(title,author,serial,publishDate);
+                break;
+            case 2:
+                item =new EBook(title,author,serial,publishDate);
+                break;
+            case 3:
+                item =new Magazine(title,author,serial,publishDate);
+                break;
+        }
+
+
+        items.emplace(serial,item);
+        cout<<"Do you want to add another item? type 'y' to continue adding."<<endl;
+        cin>>cont;
+        if(cont!='y')
+            break;
+    }
 }
 
 
 
-int handleCheckOutItem(unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+int handleCheckOutItem(vector<BorrowRecord>& recordList,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
     int userID;
-    string itemID;
-    cout<<"Please write the item id: "<<endl;
-    cin>>itemID;
+    string SerialNum;
+    cout<<"Please write the serial number: "<<endl;
+    cin>>SerialNum;
 
-    auto it=items.find(itemID);
-    if(it!=items.end()) {
-        if(!(it->second->isAvailable())) {
-            cout<<"item is not available!"<<endl;
+    auto itemIt=items.find(SerialNum);
+    if(itemIt!=items.end()) {
+        if(!(itemIt->second->isAvailable())) {
+            cout<<"item is not available! Exiting..."<<endl;
             return 3;
         }
     }
     else {
-        cout<<"item id is not found in list!"<<endl;
+        cout<<"item id is not found in list! Exiting..."<<endl;
         return 1;
     }
-
+    cout<<SerialNum;
     cout<<"Please write the user id: "<<endl;
     cin>>userID;
 
-    auto it1=users.find(userID);
-    if(it1==users.end()) {
-        cout<<"user id is not found in list!"<<endl;
+    auto userIt=users.find(userID);
+    if(userIt==users.end()) {
+        cout<<"user id is not found in list! Exiting..."<<endl;
         return 2;
     }
 
+    //Getting Today's date
+    string today=getDate();
+
+    BorrowRecord record(userIt->second.getID(),itemIt->second->getSerialNum(),today);
+    recordList.push_back(record);
+    cout<<"Check out success!";
     //TODO: insert result into Record vector
 
     return 0;
 }
 
-int handleCheckInItem(unordered_map<string, Item*>& items) {
-    string itemID;
-    cout<<"Please write the item id: "<<endl;
-    cin>>itemID;
-    auto it=items.find(itemID);
+int handleCheckInItem(vector<BorrowRecord>& recordList,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+    string SerialNum;
+    cout<<"Please write the serial number: "<<endl;
+    cin>>SerialNum;
+    auto it=items.find(SerialNum);
     if(it!=items.end()) {
         if(!(it->second->isAvailable())) {
             it->second->checkIn();
-            //TODO: update in record vector
+            string today=getDate();
+            auto it = std::find_if(recordList.rbegin(), recordList.rend(),
+    [&](const BorrowRecord& record) {
+        return record.serialNum == SerialNum && record.returnDate.empty();
+    });
+
+            if (it != recordList.rend()) {
+                it->returnDate = today;
+            } else {
+                std::cout << "Item is not currently checked out.\n";
+            }
 
         }
         else {
@@ -250,25 +258,53 @@ int handleCheckInItem(unordered_map<string, Item*>& items) {
         }
     }
     else {
-        cout<<"item id is not found in list!"<<endl;
+        cout<<"serial number is not found in list!"<<endl;
         return 1;
     }
+    return 0;
 }
 
 
+
 //--------------------------MAIN----------------------------
+
+void displayInstructions() {
+    cout<<endl
+    <<"Please write a number from the list below to use the function!"<<endl
+    <<"1: Check out an item"<<endl
+    <<"2: Check in an item"<<endl
+    <<"3: Add a user"<<endl
+    <<"4: Add an item"<<endl
+    <<"5: View all borrow history"<<endl
+    <<"6: View borrow history of a user"<<endl
+    <<"7: Exit"<<endl
+    ;
+}
 
 int main() {
     //loading two sets from files
     unordered_map<string, Item*> items=loadItems();
     unordered_map<int, User> users=loadUsers();
+    vector<BorrowRecord> recordList;
     bool continueFlag=true;
 
     //test values
     User u1("john",1);
     User u2("Alice",2);
-    Book b1("test1","oliver","1");
-    Book b22("test22","eszter","2");
+    Book b1("test1","oliver","1","1900/01/01");
+    Book b2("test2","eszter","2","2021/04/27");
+
+    // users.emplace(1,u1);
+    // users.emplace(2,u2);
+    // items.emplace("1",&b1);
+    // items.emplace("2",&b2);
+
+    for(const auto&[id,user]:users) {
+        cout<<"["<<id<<","<<user.getName()<<"]"<<", "<<endl;
+    }
+    for(const auto&[id,item]:items) {
+        cout<<"["<<id<<","<<item->getTitle()<<"]"<<", "<<endl;
+    }
 
     while(continueFlag) {
         displayInstructions();
@@ -276,15 +312,19 @@ int main() {
         cin>>choice;
         switch (choice) {
             case 1:
-                handleCheckOutItem(items,users);
+                handleCheckOutItem(recordList,items,users);
                 break;
             case 2:
-                handleCheckInItem(items);
+                handleCheckInItem(recordList,items,users);
                 break;
             case 3:
+
+
+            case 7:
                 continueFlag=false;
-            saveItems(items);
-            saveUsers(users);
+                saveItems(items);
+                saveUsers(users);
+                cout<<"Goodbye!";
                 break;
 
             default:
