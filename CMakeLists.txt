@@ -7,4 +7,7 @@ add_executable(Library-management main.cpp
         Item.cpp
         Item.h
         User.cpp
-        User.h)
+        User.h
+        Record.cpp
+        Record.h
+)

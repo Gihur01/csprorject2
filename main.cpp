@@ -9,23 +9,11 @@
 
 #include "Item.h"
 #include "User.h"
+#include "Record.h"
 using namespace std;
 
 
-//--------------------------- RECORDS -----------------------------
-struct BorrowRecord {
-    int userID;
-    string serialNum;
-    string borrowDate;
-    string returnDate;
 
-    /*BorrowRecord(int u, string s, string bd)
-        : userID(u),serialNum(s),borrowDate(bd){}
-
-    BorrowRecord(int u, string s, string bd, string rd)
-        : userID(u),serialNum(s),borrowDate(bd),returnDate(rd) {}*/
-    //Add some methods for sorting
-};
 
 //--------------------------- HELPERS ---------------------------
 string getDate() {
@@ -143,7 +131,8 @@ int handleAddItem(unordered_map<string, Item*>& items) {
         cont=0;
         cin>>type;
         if(type<=0 || type>3) {
-            cout<<"Invalid type! Please enter again";
+            cout<<"Invalid item type! Please enter again"<<endl;
+
             continue;
         }
         cout<<"Please write the title, author, publish date and the serial number (separated by a comma)"<<endl;
@@ -169,6 +158,7 @@ int handleAddItem(unordered_map<string, Item*>& items) {
                 break;
         }
 
+        item->display();
 
         items.emplace(serial,item);
         cout<<"Do you want to add another item? type 'y' to continue adding."<<endl;
@@ -181,7 +171,7 @@ int handleAddItem(unordered_map<string, Item*>& items) {
 
 
 
-int handleCheckOutItem(vector<BorrowRecord>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+int handleCheckOutItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
     int userID;
     string SerialNum;
     cout<<"Please write the serial number: "<<endl;
@@ -212,7 +202,7 @@ int handleCheckOutItem(vector<BorrowRecord>& borrowHistory,unordered_map<string,
     //Getting Today's date
     string today=getDate();
 
-    BorrowRecord record{userIt->second.getID(),itemIt->second->getSerialNum(),today,""};
+    Record record{userIt->second.getID(),itemIt->second->getSerialNum(),today,""};
     borrowHistory.push_back(record);
 
     cout<<"Check out success!";
@@ -221,7 +211,7 @@ int handleCheckOutItem(vector<BorrowRecord>& borrowHistory,unordered_map<string,
     return 0;
 }
 
-int handleCheckInItem(vector<BorrowRecord>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+int handleCheckInItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
     string SerialNum;
     cout<<"Please write the serial number: "<<endl;
     cin>>SerialNum;
@@ -233,7 +223,7 @@ int handleCheckInItem(vector<BorrowRecord>& borrowHistory,unordered_map<string, 
 
             //TODO: Change this to active borrow map
             auto it = std::find_if(borrowHistory.rbegin(), borrowHistory.rend(),
-    [&](const BorrowRecord& record) {
+    [&](const Record& record) {
                 return record.serialNum == SerialNum && record.returnDate.empty();
             });
 
@@ -279,8 +269,8 @@ int main() {
     unordered_map<int, User> users=loadUsers(); //stores all users. userID is index (User is simple, so store by value)
 
     //defining the remaining data structures
-    vector<BorrowRecord> borrowHistory; //list of all borrow records
-    std::unordered_map<std::string, BorrowRecord*> activeBorrowMap;  //records, where the item is not yet checked in
+    vector<Record> borrowHistory; //list of all borrow records
+    std::unordered_map<std::string, Record*> activeBorrowMap;  //records, where the item is not yet checked in
 
     bool continueFlag=true;
 
@@ -316,6 +306,13 @@ int main() {
                 break;
             case 3:
 
+            case 4:
+                handleAddItem(items);
+                break;
+            case 5:
+                printRecordList(borrowHistory);
+                break;
+            case 6:
 
             case 7:
                 continueFlag=false;
