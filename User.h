@@ -5,6 +5,7 @@
 #ifndef USER_H
 #define USER_H
 #include <string>
+#include <unordered_map>
 
 
 class User {
@@ -18,6 +19,9 @@ public:
     int getID() const {return userID;}
 };
 
+
+void saveUsers(const std::unordered_map<int, User>& users);
+std::unordered_map<int,User> loadUsers();
 
 
 #endif //USER_H

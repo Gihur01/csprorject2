@@ -5,6 +5,7 @@
 #ifndef ITEM_H
 #define ITEM_H
 #include <string>
+#include <unordered_map>
 
 
 class Item {
@@ -54,5 +55,12 @@ public:
     void display() const override;
     std::string getType() override {return "Magazine";}
 };
+
+
+//Functions
+void saveItems(const std::unordered_map<std::string, Item*>& items);
+std::unordered_map<std::string, Item*> loadItems();
+
+
 
 #endif //ITEM_H

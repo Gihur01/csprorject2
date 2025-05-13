@@ -10,4 +10,7 @@ add_executable(Library-management main.cpp
         User.h
         Record.cpp
         Record.h
+        Modules.cpp
+        Modules.h
+        Modules.h
 )
