@@ -130,6 +130,8 @@ int handleAddItem(unordered_map<string, Item*>& items) {
     while(true) {
         cont=0;
         cin>>type;
+std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the \n leftover in buffer
+
         if(type<=0 || type>3) {
             cout<<"Invalid item type! Please enter again"<<endl;
 
