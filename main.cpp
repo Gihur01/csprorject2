@@ -19,11 +19,11 @@ struct BorrowRecord {
     string borrowDate;
     string returnDate;
 
-    BorrowRecord(int u, string s, string bd)
+    /*BorrowRecord(int u, string s, string bd)
         : userID(u),serialNum(s),borrowDate(bd){}
 
     BorrowRecord(int u, string s, string bd, string rd)
-        : userID(u),serialNum(s),borrowDate(bd),returnDate(rd) {}
+        : userID(u),serialNum(s),borrowDate(bd),returnDate(rd) {}*/
     //Add some methods for sorting
 };
 
@@ -34,19 +34,6 @@ string getDate() {
     return date_string;
 }
 
-std::vector<BorrowRecord>::reverse_iterator findActiveRecordByUser(vector<BorrowRecord>& recordList, int userID) {
-    return std::find_if(recordList.rbegin(), recordList.rend(),
-        [&](const BorrowRecord& record) {
-            return record.userID == userID && record.returnDate.empty();
-        });
-}
-
-std::vector<BorrowRecord>::reverse_iterator findActiveRecordBySerial(vector<BorrowRecord>& recordList,const std::string& serialNum) {
-    return std::find_if(recordList.rbegin(), recordList.rend(),
-        [&](const BorrowRecord& record) {
-            return record.serialNum == serialNum && record.returnDate.empty();
-        });
-}
 
 //--------------------------- MODULES ---------------------------
 
@@ -189,16 +176,18 @@ int handleAddItem(unordered_map<string, Item*>& items) {
         if(cont!='y')
             break;
     }
+    return 0;
 }
 
 
 
-int handleCheckOutItem(vector<BorrowRecord>& recordList,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+int handleCheckOutItem(vector<BorrowRecord>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
     int userID;
     string SerialNum;
     cout<<"Please write the serial number: "<<endl;
     cin>>SerialNum;
 
+    //Inputs & checking
     auto itemIt=items.find(SerialNum);
     if(itemIt!=items.end()) {
         if(!(itemIt->second->isAvailable())) {
@@ -223,15 +212,16 @@ int handleCheckOutItem(vector<BorrowRecord>& recordList,unordered_map<string, It
     //Getting Today's date
     string today=getDate();
 
-    BorrowRecord record(userIt->second.getID(),itemIt->second->getSerialNum(),today);
-    recordList.push_back(record);
+    BorrowRecord record{userIt->second.getID(),itemIt->second->getSerialNum(),today,""};
+    borrowHistory.push_back(record);
+
     cout<<"Check out success!";
-    //TODO: insert result into Record vector
+
 
     return 0;
 }
 
-int handleCheckInItem(vector<BorrowRecord>& recordList,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+int handleCheckInItem(vector<BorrowRecord>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
     string SerialNum;
     cout<<"Please write the serial number: "<<endl;
     cin>>SerialNum;
@@ -240,12 +230,14 @@ int handleCheckInItem(vector<BorrowRecord>& recordList,unordered_map<string, Ite
         if(!(it->second->isAvailable())) {
             it->second->checkIn();
             string today=getDate();
-            auto it = std::find_if(recordList.rbegin(), recordList.rend(),
-    [&](const BorrowRecord& record) {
-        return record.serialNum == SerialNum && record.returnDate.empty();
-    });
 
-            if (it != recordList.rend()) {
+            //TODO: Change this to active borrow map
+            auto it = std::find_if(borrowHistory.rbegin(), borrowHistory.rend(),
+    [&](const BorrowRecord& record) {
+                return record.serialNum == SerialNum && record.returnDate.empty();
+            });
+
+            if (it != borrowHistory.rend()) {
                 it->returnDate = today;
             } else {
                 std::cout << "Item is not currently checked out.\n";
@@ -282,23 +274,28 @@ void displayInstructions() {
 }
 
 int main() {
-    //loading two sets from files
-    unordered_map<string, Item*> items=loadItems();
-    unordered_map<int, User> users=loadUsers();
-    vector<BorrowRecord> recordList;
+    //loading data from files
+    unordered_map<string, Item*> items=loadItems(); //stores all items. Serial number is index
+    unordered_map<int, User> users=loadUsers(); //stores all users. userID is index (User is simple, so store by value)
+
+    //defining the remaining data structures
+    vector<BorrowRecord> borrowHistory; //list of all borrow records
+    std::unordered_map<std::string, BorrowRecord*> activeBorrowMap;  //records, where the item is not yet checked in
+
     bool continueFlag=true;
 
     //test values
     User u1("john",1);
     User u2("Alice",2);
-    Book b1("test1","oliver","1","1900/01/01");
-    Book b2("test2","eszter","2","2021/04/27");
+    Book b1("test1","oliver","1","1900-01-01");
+    Book b2("test2","eszter","2","2021-04-27");
 
     // users.emplace(1,u1);
     // users.emplace(2,u2);
     // items.emplace("1",&b1);
     // items.emplace("2",&b2);
 
+    //test print
     for(const auto&[id,user]:users) {
         cout<<"["<<id<<","<<user.getName()<<"]"<<", "<<endl;
     }
@@ -312,10 +309,10 @@ int main() {
         cin>>choice;
         switch (choice) {
             case 1:
-                handleCheckOutItem(recordList,items,users);
+                handleCheckOutItem(borrowHistory,items,users);
                 break;
             case 2:
-                handleCheckInItem(recordList,items,users);
+                handleCheckInItem(borrowHistory,items,users);
                 break;
             case 3:
 
