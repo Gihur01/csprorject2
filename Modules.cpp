@@ -6,29 +6,27 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-
-#include "Modules.h"
-
 #include <chrono>
 #include <iostream>
-#include <limits>
 #include <sstream>
 
 #include "Item.h"
 #include "Record.h"
 #include "User.h"
+#include "Modules.h"
+#include "InputHelpers.h"
+
 using namespace std;
 
 
-//--------------------------- HELPERS ---------------------------
+//--------------------------- HELPERS ----------------
 string getDate() {
     auto now = std::chrono::system_clock::now();
     std::string date_string = std::format("{:%Y-%m-%d}", now);
     return date_string;
 }
 
-//--------------------------- MODULES ---------------------------
+//--------------------------- MODULES ---------------------
 
 int handleAddItem(unordered_map<string, Item*>& items) {
     cout<<"Please select the type of the new item with 1,2,3:"<<endl
@@ -38,30 +36,27 @@ int handleAddItem(unordered_map<string, Item*>& items) {
     ;
     int type=0;
 
-    std::string line;
-    std::string segment;
+    string line;
     string title, author, publishDate, serial;
-    char cont=0;
+    vector<string> CSVList;
 
     while(true) {
-        cont=0;
-        cin>>type;
-std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the \n leftover in buffer
+        string typeInput;
+        getline(cin, typeInput);
+        std::stringstream(typeInput) >> type; // Clear the \n leftover in buffer
 
         if(type<=0 || type>3) {
             cout<<"Invalid item type! Please enter again"<<endl;
 
             continue;
         }
-        cout<<"Please write the title, author, publish date and the serial number (separated by a comma)"<<endl;
 
-        std::getline(std::cin, line);
-        std::stringstream ss(line);
 
-        std::getline(ss, title, ',');
-        std::getline(ss, author, ',');
-        std::getline(ss, publishDate, ',');
-        std::getline(ss, serial, ',');
+        CSVList=readCSVFields("Please write the title, author, publish date and the serial number (separated by a comma)\n",4);
+        title=CSVList[0];
+        author=CSVList[1];
+        publishDate=CSVList[2];
+        serial=CSVList[3];
 
         Item* item;
         switch (type) {
@@ -77,89 +72,129 @@ std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the
         }
 
         item->display();
-
         items.emplace(serial,item);
-        cout<<"Do you want to add another item? type 'y' to continue adding."<<endl;
-        cin>>cont;
-        if(cont!='y')
+
+        //Showing the continue option
+        bool contInput=readYesNo("Do you want to add another item? (y/n)\n");
+        if (!contInput)
             break;
+
+
     }
     return 0;
 }
 
+
+int handleAddUser(unordered_map<int, User>& users) {
+    while(true) {
+        string name=readStr("Please enter the user's name (the ID is automatically assigned)\n");
+        User tempUser(name);
+        users.emplace(tempUser.getID(),tempUser);
+        cout<<"Success!"<<endl;
+        bool contInput=readYesNo("Do you want to add another user? (y/n)\n");
+        if(!contInput)
+            break;
+    }
+}
 
 
 int handleCheckOutItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
-    int userID;
-    string SerialNum;
-    cout<<"Please write the serial number: "<<endl;
-    cin>>SerialNum;
+    try {
+        string SerialNum=readStr("Please write the serial number: \n");
 
-    //Inputs & checking
-    auto itemIt=items.find(SerialNum);
-    if(itemIt!=items.end()) {
-        if(!(itemIt->second->isAvailable())) {
-            cout<<"item is not available! Exiting..."<<endl;
-            return 3;
+        //Check if item exists
+        auto itemIt = items.find(SerialNum);
+        if (itemIt == items.end()) {
+            throw 1;  // Item not found
         }
+
+        //Check availability
+        if (!(itemIt->second->isAvailable())) {
+            throw 3;  // Item not available
+        }
+
+        // cout<<SerialNum;
+        int userID=readValue<int>("Please write the user id: \n");
+
+        //Check if user exists
+        auto userIt = users.find(userID);
+        userIt->second.display();
+
+        if (userIt == users.end()) {
+            throw 2;  // User not found
+        }
+
+        //Getting Today's date
+        string today=getDate();
+
+        Record record{userIt->second.getID(),itemIt->second->getSerialNum(),today,""};
+        borrowHistory.push_back(record);
+
+        cout<<"Check out success!";
+
+
+        return 0;
     }
-    else {
-        cout<<"item id is not found in list! Exiting..."<<endl;
-        return 1;
+    catch (int e) {
+        switch (e) {
+            case 1:
+                cout << "Error: Item serial number not found in the list!" << endl; break;
+            case 2:
+                cout << "Error: User ID not found in the list!" << endl; break;
+            case 3:
+                cout << "Error: Item is not available!" << endl; break;
+            default:
+                cout << "Unknown error occurred." << endl;
+        }
+        return e;
     }
-    cout<<SerialNum;
-    cout<<"Please write the user id: "<<endl;
-    cin>>userID;
-
-    auto userIt=users.find(userID);
-    if(userIt==users.end()) {
-        cout<<"user id is not found in list! Exiting..."<<endl;
-        return 2;
-    }
-
-    //Getting Today's date
-    string today=getDate();
-
-    Record record{userIt->second.getID(),itemIt->second->getSerialNum(),today,""};
-    borrowHistory.push_back(record);
-
-    cout<<"Check out success!";
-
-
-    return 0;
 }
 
 int handleCheckInItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
-    string SerialNum;
-    cout<<"Please write the serial number: "<<endl;
-    cin>>SerialNum;
-    auto it=items.find(SerialNum);
-    if(it!=items.end()) {
-        if(!(it->second->isAvailable())) {
-            it->second->checkIn();
-            string today=getDate();
+    try{
+        string SerialNum=readStr("Please write the serial number: \n");
 
-            //TODO: Change this to active borrow map
-            auto it = std::find_if(borrowHistory.rbegin(), borrowHistory.rend(),
-    [&](const Record& record) {
+        auto it = items.find(SerialNum);
+        if (it == items.end()) {
+            throw 1; //Item not found
+        }
+
+        if (it->second->isAvailable()) {
+            throw 3; //Item already checked in
+        }
+
+        //Check in the item
+        it->second->checkIn();
+        string today = getDate();
+
+        //Find the record without return date
+        auto recordIt = std::find_if(borrowHistory.rbegin(), borrowHistory.rend(),
+            [&](const Record& record) {
                 return record.serialNum == SerialNum && record.returnDate.empty();
             });
 
-            if (it != borrowHistory.rend()) {
-                it->returnDate = today;
-            } else {
-                std::cout << "Item is not currently checked out.\n";
-            }
+        if (recordIt != borrowHistory.rend()) {
+            recordIt->returnDate = today;
+        } else {
+            throw 2;
+        }
 
-        }
-        else {
-            cout<<"This item is already checked out!"<<endl;
-            return 3;
-        }
+        cout << "Check in successful!\n";
+        return 0;
     }
-    else {
-        cout<<"serial number is not found in list!"<<endl;
-        return 1;
+    catch (int e) {
+        switch (e) {
+            case 1:
+                cout<<"Error: Serial number not found in item list!"<< endl;
+                break;
+            case 2:
+                cout <<"Error: No checkout record was found for this item.\n";
+            case 3:
+                cout<< "Error: This item is already checked in!" << endl;
+                break;
+            default:
+                cout<< "Unknown error occurred during check-in." << endl;
+        }
+        return e;
     }
-    return 0;
 }

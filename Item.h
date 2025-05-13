@@ -27,6 +27,7 @@ public:
     std::string getAuthor() const {return author;}
     std::string getSerialNum() const {return SerialNum;}
     bool isAvailable() const {return !isCheckedOut;}
+    virtual std::string getFormat(){return "";}
     virtual std::string getType() =0; //gets the type of the current object
 
     // virtual ~Item();

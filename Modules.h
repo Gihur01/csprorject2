@@ -16,6 +16,7 @@ using namespace std;
 
 
 int handleAddItem(unordered_map<string, Item*>& items);
+int handleAddUser(unordered_map<int, User>& users);
 int handleCheckOutItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users);
 int handleCheckInItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users);
 

@@ -7,10 +7,22 @@
 #include <fstream>
 #include <iostream>
 
-User::User(std::string n, int id): name(n), userID(id) {}
+User::User(std::string n): name(n) {
+    userID=userIDCounter;
+    userIDCounter++;
+}
+User::User(User& theOther) {
+    name=theOther.getName();
+    userID=theOther.getID();
+}
+
+
 void User::display() const {
     std::cout << "User: " << name << " (ID: " << userID << ")\n";
 }
+
+
+int User::userIDCounter=1;
 
 void saveUsers(const std::unordered_map<int, User>& users) {
     std::ofstream outFile("userdb.txt", std::fstream::out);
@@ -30,7 +42,7 @@ std::unordered_map<int,User> loadUsers() {
     while (inFile>>id) {
         if (inFile.get() == ',')
             std::getline(inFile, name);
-        users.emplace(id, User(name, id));
+        users.emplace(id, User(name));
     }
     return users;
 }

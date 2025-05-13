@@ -11,8 +11,10 @@
 class User {
     std::string name;
     int userID;
+    static int userIDCounter;
 public:
-    User(std::string n, int id);
+    User(std::string n);
+    User(User& theOther);
     void display() const;
 
     std::string getName() const {return name;}
@@ -22,6 +24,7 @@ public:
 
 void saveUsers(const std::unordered_map<int, User>& users);
 std::unordered_map<int,User> loadUsers();
+
 
 
 #endif //USER_H

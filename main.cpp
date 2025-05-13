@@ -9,6 +9,7 @@
 #include "Modules.h"
 #include "User.h"
 #include "Record.h"
+#include "InputHelpers.h"
 using namespace std;
 
 
@@ -22,8 +23,7 @@ void displayInstructions() {
     <<"3: Add a user"<<endl
     <<"4: Add an item"<<endl
     <<"5: View all borrow history"<<endl
-    <<"6: View borrow history of a user"<<endl
-    <<"7: Exit"<<endl
+    <<"6: Exit"<<endl
     ;
 }
 
@@ -34,15 +34,14 @@ int main() {
 
     //defining the remaining data structures
     vector<Record> borrowHistory; //list of all borrow records
-    std::unordered_map<std::string, Record*> activeBorrowMap;  //records, where the item is not yet checked in
 
     bool continueFlag=true;
 
     //test values
-    User u1("john",1);
-    User u2("Alice",2);
-    Book b1("test1","oliver","1","1900-01-01");
-    Book b2("test2","eszter","2","2021-04-27");
+    // User u1("john");
+    // User u2("Alice");
+    // Book b1("test1","oliver","1","1900-01-01");
+    // Book b2("test2","eszter","2","2021-04-27");
 
     // users.emplace(1,u1);
     // users.emplace(2,u2);
@@ -59,8 +58,7 @@ int main() {
 
     while(continueFlag) {
         displayInstructions();
-        int choice;
-        cin>>choice;
+        int choice=readValue<int>();
         switch (choice) {
             case 1:
                 handleCheckOutItem(borrowHistory,items,users);
@@ -69,7 +67,7 @@ int main() {
                 handleCheckInItem(borrowHistory,items,users);
                 break;
             case 3:
-
+                handleAddUser(users);
             case 4:
                 handleAddItem(items);
                 break;
@@ -77,8 +75,6 @@ int main() {
                 printRecordList(borrowHistory);
                 break;
             case 6:
-
-            case 7:
                 continueFlag=false;
                 saveItems(items);
                 saveUsers(users);
@@ -86,6 +82,7 @@ int main() {
                 break;
 
             default:
+                cout<<"Not a valid option. Try again!"<<endl;
                 break;
         }
 

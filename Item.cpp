@@ -68,18 +68,24 @@ void saveItems(const std::unordered_map<std::string, Item*>& items) {
     std::ofstream outFile("itemdb.txt", std::fstream::out);
     for (const auto& [isbn, item] : items) {
 
-        if (auto* book = dynamic_cast<Book*>(item)) {
-            outFile << "Book," << book->getSerialNum() << ","
-            << book->getTitle()<< ","
-            << book->getAuthor() << ","
-            << book->isAvailable() << std::endl;
+        if (item->getType()=="Book") {
+            outFile << "Book," << item->getSerialNum() << ","
+            << item->getTitle()<< ","
+            << item->getAuthor() << ","
+            << item->isAvailable() << std::endl;
         }
-        else if (auto* ebook = dynamic_cast<EBook*>(item)) {
-            outFile << "EBook," << ebook->getSerialNum() << ","
-            << ebook->getTitle()<< ","
-            << ebook->getAuthor() << ","
-            << ebook->getFormat()<< ","
-            << ebook->isAvailable() << std::endl;
+        else if (item->getType()=="EBook") {
+            outFile << "EBook," << item->getSerialNum() << ","
+            << item->getTitle()<< ","
+            << item->getAuthor() << ","
+            << item->getFormat()<< ","
+            << item->isAvailable() << std::endl;
+        }
+        else if (item->getType()=="Magazine") {
+            outFile << "Magazine," << item->getSerialNum() << ","
+            << item->getTitle()<< ","
+            << item->getAuthor() << ","
+            << item->isAvailable() << std::endl;
         }
     }
 }
@@ -117,6 +123,13 @@ std::unordered_map<std::string, Item*> loadItems() {
             auto* ebook = new EBook(title, author, serial, publishDate, format);
             if (!available) ebook->checkOut();
             items[serial] = ebook;
+        }
+        else if (type == "Magazine") {
+            std::getline(ss, availableStr);
+            available = (availableStr == "1");
+            auto* magazine = new Magazine(title, author, serial, publishDate);
+            if (!available) magazine->checkOut(); //setting  available state
+            items[serial] = magazine;
         }
     }
 

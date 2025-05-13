@@ -34,10 +34,5 @@ void printRecordList(const vector<Record>& records) {
              << setw(widthDate) << record.returnDate
              << endl;
     }
-    cout<<"Input any character (and press return) to return to menu"<<endl;
-    //This just prevents the menu from popping up immediately
-    char temp;
-    cin>>temp;
-    //After getting the char, discard the cin to prevent accidental actions
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cout<<"\n\n\n"; //This just separates the table from the menu options a bit
 }

@@ -13,4 +13,6 @@ add_executable(Library-management main.cpp
         Modules.cpp
         Modules.h
         Modules.h
+        InputHelpers.cpp
+        InputHelpers.h
 )
