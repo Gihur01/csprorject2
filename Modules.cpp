@@ -249,7 +249,7 @@ unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record> borrowHis
     unordered_map<std::string, Record*> activeBorrowMap;
     for(const auto& record :borrowHistory) {
         if(record.returnDate.empty()) {
-            activeBorrowMap.emplace(record.serialNum,record);
+            activeBorrowMap.emplace(record.serialNum,&record);
         }
     }
     return  activeBorrowMap;
