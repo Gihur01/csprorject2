@@ -10,6 +10,8 @@
 #include "User.h"
 #include "Record.h"
 #include "InputHelpers.h"
+#include "Printer.h"
+
 using namespace std;
 
 
@@ -23,7 +25,9 @@ void displayInstructions() {
     <<"3: Add a user"<<endl
     <<"4: Add an item"<<endl
     <<"5: View all borrow history"<<endl
-    <<"6: Exit"<<endl
+    <<"6: View borrow history of a user"<<endl
+    <<"7: View all current checked out items"<<endl
+    <<"8: Exit"<<endl
     ;
 }
 
@@ -31,9 +35,12 @@ int main() {
     //loading data from files
     unordered_map<string, Item*> items=loadItems(); //stores all items. Serial number is index
     unordered_map<int, User> users=loadUsers(); //stores all users. userID is index (User is simple, so store by value)
+        //this loading has the consequence of reading the static variable "userIDCounter" from userdb too.
+
 
     //defining the remaining data structures
-    vector<Record> borrowHistory; //list of all borrow records
+    vector<Record> borrowHistory=loadRecords(); //list of all borrow records
+    std::unordered_map<std::string, Record*> activeBorrowMap =loadActiveBorrowMap(borrowHistory); //stores all records that are yet to be checked in.
 
     bool continueFlag=true;
 
@@ -49,41 +56,50 @@ int main() {
     // items.emplace("2",&b2);
 
     //test print
-    for(const auto&[id,user]:users) {
-        cout<<"["<<id<<","<<user.getName()<<"]"<<", "<<endl;
-    }
-    for(const auto&[id,item]:items) {
-        cout<<"["<<id<<","<<item->getTitle()<<"]"<<", "<<endl;
-    }
+
+    Printer::printUsersList(users);
+    Printer::printItemList(items);
+
 
     while(continueFlag) {
         displayInstructions();
         int choice=readValue<int>();
         switch (choice) {
             case 1:
-                handleCheckOutItem(borrowHistory,items,users);
+                handleCheckOutItem(borrowHistory,activeBorrowMap,items,users);
                 break;
             case 2:
-                handleCheckInItem(borrowHistory,items,users);
+                handleCheckInItem(activeBorrowMap,items);
                 break;
             case 3:
                 handleAddUser(users);
+                break;
             case 4:
                 handleAddItem(items);
                 break;
             case 5:
-                printRecordList(borrowHistory);
+                Printer::printRecordList(borrowHistory,items,users);
                 break;
             case 6:
+                handlePrintUserRecords(borrowHistory,items,users);
+                break;
+
+            case 7:
+                Printer::printActiveBorrowList(activeBorrowMap,items,users);
+                break;
+
+            case 8:
                 continueFlag=false;
                 saveItems(items);
                 saveUsers(users);
+                saveRecords(borrowHistory);
                 cout<<"Goodbye!";
+
                 break;
 
             default:
                 cout<<"Not a valid option. Try again!"<<endl;
-                break;
+
         }
 
     }

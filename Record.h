@@ -6,6 +6,7 @@
 #define RECORD_H
 #include <string>
 #include <vector>
+
 using namespace std;
 
 
@@ -16,6 +17,10 @@ struct Record {
     string  returnDate;
 };
 
-void printRecordList(const vector<Record>& records);
+
+
+void saveRecords(const vector<Record>& records);
+
+vector<Record> loadRecords();
 
 #endif //RECORD_H

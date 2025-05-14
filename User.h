@@ -11,10 +11,13 @@
 class User {
     std::string name;
     int userID;
-    static int userIDCounter;
+
 public:
+    static int userIDCounter;
+
     User(std::string n);
-    User(User& theOther);
+    User(std::string n,int id);
+    User(const User& theOther);
     void display() const;
 
     std::string getName() const {return name;}

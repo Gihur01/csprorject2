@@ -88,6 +88,7 @@ void saveItems(const std::unordered_map<std::string, Item*>& items) {
             << item->isAvailable() << std::endl;
         }
     }
+    outFile.close();
 }
 
 
@@ -133,5 +134,6 @@ std::unordered_map<std::string, Item*> loadItems() {
         }
     }
 
+    inFile.close();
     return items;
 }

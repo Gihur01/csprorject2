@@ -15,6 +15,7 @@
 #include "User.h"
 #include "Modules.h"
 #include "InputHelpers.h"
+#include "Printer.h"
 
 using namespace std;
 
@@ -26,14 +27,11 @@ string getDate() {
     return date_string;
 }
 
+
 //--------------------------- MODULES ---------------------
 
 int handleAddItem(unordered_map<string, Item*>& items) {
-    cout<<"Please select the type of the new item with 1,2,3:"<<endl
-    <<"1. Book"<<endl
-    <<"2. Ebook"<<endl
-    <<"3. Magazine"<<endl
-    ;
+
     int type=0;
 
     string line;
@@ -41,6 +39,12 @@ int handleAddItem(unordered_map<string, Item*>& items) {
     vector<string> CSVList;
 
     while(true) {
+        cout<<"Please select the type of the new item with 1,2,3:"<<endl
+        <<"1. Book"<<endl
+        <<"2. Ebook"<<endl
+        <<"3. Magazine"<<endl
+        ;
+
         string typeInput;
         getline(cin, typeInput);
         std::stringstream(typeInput) >> type; // Clear the \n leftover in buffer
@@ -95,10 +99,14 @@ int handleAddUser(unordered_map<int, User>& users) {
         if(!contInput)
             break;
     }
+    return 0;
 }
 
 
-int handleCheckOutItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+int handleCheckOutItem(vector<Record>& borrowHistory,
+    unordered_map<string, Record*>& activeBorrowMap,
+    unordered_map<string, Item*>& items,
+    unordered_map<int, User>& users) {
     try {
         string SerialNum=readStr("Please write the serial number: \n");
 
@@ -118,17 +126,23 @@ int handleCheckOutItem(vector<Record>& borrowHistory,unordered_map<string, Item*
 
         //Check if user exists
         auto userIt = users.find(userID);
-        userIt->second.display();
+        // userIt->second.display();
 
         if (userIt == users.end()) {
             throw 2;  // User not found
         }
 
+        itemIt->second->checkOut();
+
         //Getting Today's date
         string today=getDate();
-
-        Record record{userIt->second.getID(),itemIt->second->getSerialNum(),today,""};
+        Record record{userIt->second.getID(),SerialNum,today,""};
         borrowHistory.push_back(record);
+
+        activeBorrowMap[SerialNum]= &borrowHistory.back(); //Adding this new record to activeBorrowMap.
+
+
+        // printItemList(items);
 
         cout<<"Check out success!";
 
@@ -150,36 +164,39 @@ int handleCheckOutItem(vector<Record>& borrowHistory,unordered_map<string, Item*
     }
 }
 
-int handleCheckInItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users) {
+int handleCheckInItem(unordered_map<string, Record*>& activeBorrowMap,
+    unordered_map<string, Item*>& items) {
     try{
         string SerialNum=readStr("Please write the serial number: \n");
 
-        auto it = items.find(SerialNum);
-        if (it == items.end()) {
+        auto itemIt = items.find(SerialNum);
+        if (itemIt == items.end()) {
             throw 1; //Item not found
         }
 
-        if (it->second->isAvailable()) {
+        if (itemIt->second->isAvailable()) {
             throw 3; //Item already checked in
         }
 
         //Check in the item
-        it->second->checkIn();
+        itemIt->second->checkIn();
         string today = getDate();
 
         //Find the record without return date
-        auto recordIt = std::find_if(borrowHistory.rbegin(), borrowHistory.rend(),
-            [&](const Record& record) {
-                return record.serialNum == SerialNum && record.returnDate.empty();
-            });
-
-        if (recordIt != borrowHistory.rend()) {
-            recordIt->returnDate = today;
+        auto recordIt = activeBorrowMap.find(SerialNum);
+        if (recordIt != activeBorrowMap.end()) {
+            recordIt->second->returnDate = today;
+            activeBorrowMap.erase(recordIt);
         } else {
             throw 2;
         }
 
-        cout << "Check in successful!\n";
+        itemIt->second->checkIn();
+
+        cout << "Check in successful!\n\n";
+
+        // Printer::printItemList(items);
+
         return 0;
     }
     catch (int e) {
@@ -189,6 +206,7 @@ int handleCheckInItem(vector<Record>& borrowHistory,unordered_map<string, Item*>
                 break;
             case 2:
                 cout <<"Error: No checkout record was found for this item.\n";
+                break;
             case 3:
                 cout<< "Error: This item is already checked in!" << endl;
                 break;
@@ -197,4 +215,42 @@ int handleCheckInItem(vector<Record>& borrowHistory,unordered_map<string, Item*>
         }
         return e;
     }
+}
+
+
+void handlePrintUserRecords(const vector<Record>& borrowHistory,
+    const unordered_map<string, Item*>& items,
+    const unordered_map<int, User>& users) {
+    try {
+        int userID;
+        while(true) {
+             userID=readValue<int>("Please write the user id: \n");
+            auto userIt = users.find(userID);
+            if (userIt == users.end()) {
+                throw 1;  //User not found
+            }
+            break;
+        }
+        Printer::printRecordList(borrowHistory,items,users,userID);
+
+    }
+    catch (int e) {
+        switch (e) {
+            case 1:
+                cout << "Error: User ID not found in the list!" << endl; break;
+            default:
+                cout << "Unknown error occurred." << endl;
+        }
+
+    }
+}
+
+unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record> borrowHistory) {
+    unordered_map<std::string, Record*> activeBorrowMap;
+    for(const auto& record :borrowHistory) {
+        if(record.returnDate.empty()) {
+            activeBorrowMap.emplace(record.serialNum,record);
+        }
+    }
+    return  activeBorrowMap;
 }

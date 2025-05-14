@@ -14,11 +14,26 @@
 #include "User.h"
 using namespace std;
 
+//date function
+string getDate();
 
+
+
+//actual modules
 int handleAddItem(unordered_map<string, Item*>& items);
 int handleAddUser(unordered_map<int, User>& users);
-int handleCheckOutItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users);
-int handleCheckInItem(vector<Record>& borrowHistory,unordered_map<string, Item*>& items, unordered_map<int, User>& users);
+int handleCheckOutItem(vector<Record>& borrowHistory,
+    unordered_map<string, Record*>& activeBorrowMap,
+    unordered_map<string, Item*>& items,
+    unordered_map<int, User>& users);
 
+int handleCheckInItem(unordered_map<string, Record*>& activeBorrowMap,
+    unordered_map<string, Item*>& items);
+
+void handlePrintUserRecords(const vector<Record>& borrowHistory,
+    const unordered_map<string, Item*>& items,
+    const unordered_map<int, User>& users);
+
+unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record> borrowHistory);
 
 #endif //MODULES_H

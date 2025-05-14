@@ -4,35 +4,56 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
-#include "Record.h"
+#include <fstream>
 
-#include <limits>
+#include "Record.h"
+#include "Item.h"
+#include "User.h"
+
+
 using namespace std;
 
-void printRecordList(const vector<Record>& records) {
-    // Column widths
-    const int widthID = 10;
-    const int widthSerial = 15;
-    const int widthDate = 15;
 
-    // Header
-    cout << left
-         << setw(widthID) << "User ID"
-         << setw(widthSerial) << "Serial Num"
-         << setw(widthDate) << "Borrow Date"
-         << setw(widthDate) << "Return Date"
-         << endl;
+void saveRecords(const vector<Record>& records) {
+    ofstream outFile("recorddb.txt");
 
-    cout << string(widthID + widthSerial + 2 * widthDate, '-') << endl;
-
-    // Rows
-    for (const auto& record : records) {
-        cout << left
-             << setw(widthID) << record.userID
-             << setw(widthSerial) << record.serialNum
-             << setw(widthDate) << record.borrowDate
-             << setw(widthDate) << record.returnDate
-             << endl;
+    for (const Record& r : records) {
+        outFile << r.userID << ','
+                << r.serialNum << ','
+                << r.borrowDate << ','
+                << r.returnDate << '\n';
     }
-    cout<<"\n\n\n"; //This just separates the table from the menu options a bit
+
+    outFile.close();
 }
+
+vector<Record> loadRecords() {
+    vector<Record> borrowHistory;
+    ifstream inFile("recorddb.txt");
+    if (!inFile) {
+        return borrowHistory;
+    }
+
+    string line;
+    while (getline(inFile, line)) {
+        istringstream ss(line);
+        Record r;
+        string token;
+
+        getline(ss, token, ',');
+        r.userID = stoi(token);
+
+        getline(ss, r.serialNum, ',');
+        getline(ss, r.borrowDate, ',');
+        getline(ss, r.returnDate);
+
+        borrowHistory.push_back(r);
+    }
+
+    inFile.close();
+
+    return borrowHistory;
+}
+
+
+
