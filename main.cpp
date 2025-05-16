@@ -11,6 +11,7 @@
 #include "Record.h"
 #include "InputHelpers.h"
 #include "Printer.h"
+#include "DynArr.h"
 
 using namespace std;
 
@@ -38,8 +39,8 @@ int main() {
         //this loading has the consequence of reading the static variable "userIDCounter" from userdb too.
 
     //defining the remaining data structures
-    vector<Record> borrowHistory=loadRecords(); //list of all borrow records
-    std::unordered_map<std::string, Record*> activeBorrowMap =loadActiveBorrowMap(borrowHistory); //stores all records that are yet to be checked in.
+    DynArr<Record> borrowHistory=loadRecords(); //list of all borrow records
+    unordered_map<string, Record*> activeBorrowMap =loadActiveBorrowMap(borrowHistory); //stores all records that are yet to be checked in.
 
     bool continueFlag=true;
 

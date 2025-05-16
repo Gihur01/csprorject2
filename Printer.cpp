@@ -34,25 +34,26 @@ void Printer::printTableHeader() {
 }
 
 
-void Printer::printRecordList(const vector<Record>& records,
+void Printer::printRecordList(const DynArr<Record>& records,
     const unordered_map<string, Item*>& items,
     const unordered_map<int, User>& users,
-    const int userID) {
+    const int userIDSearchValue) {
 
     printTableHeader();
 
     // Rows
-    for (const auto& record : records) {
-        if(userID!=-1 && record.userID!=userID) {
+    for (int i=0;i<records.getLength();i++) {
+        const auto&[userID, serialNum, borrowDate, returnDate]=records[i];
+        if(userIDSearchValue!=-1 && userID!=userIDSearchValue) {
             continue;
         }
             cout<< left
-            << setw(widthID) << record.userID
-            <<setw(widthName) << users.at(record.userID).getName()
-            << setw(widthSerial) << record.serialNum
-            << setw(widthTitle) << items.at(record.serialNum)->getTitle()
-            << setw(widthDate) << record.borrowDate
-            << setw(widthDate) << record.returnDate
+            << setw(widthID) << userID
+            <<setw(widthName) << users.at(userID).getName()
+            << setw(widthSerial) << serialNum
+            << setw(widthTitle) << items.at(serialNum)->getTitle()
+            << setw(widthDate) << borrowDate
+            << setw(widthDate) << returnDate
             << endl;
 
     }
@@ -77,7 +78,7 @@ void Printer::printActiveBorrowList(const unordered_map<string, Record*>& active
             << setw(widthDate) << record->returnDate
             << endl;
         }
-        catch (int e) {
+        catch (...) {
             //Do nothing. Sometimes .empty() causes an out of bounds error after checking out; just ignore it.
         }
     }

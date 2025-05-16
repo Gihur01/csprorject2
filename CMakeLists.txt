@@ -17,6 +17,5 @@ add_executable(Library-management main.cpp
         InputHelpers.h
         Printer.cpp
         Printer.h
-        DynArr.cpp
         DynArr.h
 )

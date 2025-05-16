@@ -16,14 +16,15 @@
 #include "Modules.h"
 #include "InputHelpers.h"
 #include "Printer.h"
+#include "DynArr.h"
 
 using namespace std;
 
 
 //--------------------------- HELPERS ----------------
 string getDate() {
-    auto now = std::chrono::system_clock::now();
-    std::string date_string = std::format("{:%Y-%m-%d}", now);
+    auto now = chrono::system_clock::now();
+    string date_string = format("{:%Y-%m-%d}", now);
     return date_string;
 }
 
@@ -47,7 +48,7 @@ int handleAddItem(unordered_map<string, Item*>& items) {
 
         string typeInput;
         getline(cin, typeInput);
-        std::stringstream(typeInput) >> type; // Clear the \n leftover in buffer
+        stringstream(typeInput) >> type; // Clear the \n leftover in buffer
 
         if(type<=0 || type>3) {
             cout<<"Invalid item type! Please enter again"<<endl;
@@ -103,7 +104,7 @@ int handleAddUser(unordered_map<int, User>& users) {
 }
 
 
-int handleCheckOutItem(vector<Record>& borrowHistory,
+int handleCheckOutItem(DynArr<Record>& borrowHistory,
     unordered_map<string, Record*>& activeBorrowMap,
     unordered_map<string, Item*>& items,
     unordered_map<int, User>& users) {
@@ -137,10 +138,12 @@ int handleCheckOutItem(vector<Record>& borrowHistory,
         //Getting Today's date
         string today=getDate();
         Record record{userIt->second.getID(),SerialNum,today,""};
-        borrowHistory.push_back(record);
+        borrowHistory.push(record);
 
         // activeBorrowMap[SerialNum]; //Adding this new record to activeBorrowMap.
-        activeBorrowMap.emplace(SerialNum,&borrowHistory.back());
+        Record* temppRecordPointer=borrowHistory.pLast();
+        Record* temp2=borrowHistory.pLast();
+        activeBorrowMap.emplace(SerialNum,temppRecordPointer);
 
         // printItemList(items);
 
@@ -218,7 +221,7 @@ int handleCheckInItem(unordered_map<string, Record*>& activeBorrowMap,
 }
 
 
-void handlePrintUserRecords(const vector<Record>& borrowHistory,
+void handlePrintUserRecords(const DynArr<Record>& borrowHistory,
     const unordered_map<string, Item*>& items,
     const unordered_map<int, User>& users) {
     try {
@@ -245,9 +248,10 @@ void handlePrintUserRecords(const vector<Record>& borrowHistory,
     }
 }
 
-unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record>& borrowHistory) {
-    unordered_map<std::string, Record*> activeBorrowMap;
-    for(auto& record :borrowHistory) {
+unordered_map<string, Record*> loadActiveBorrowMap(DynArr<Record>& borrowHistory) {
+    unordered_map<string, Record*> activeBorrowMap;
+    for (int i=0;i<borrowHistory.getLength();i++) {
+        Record& record=borrowHistory[i];
         if(record.returnDate.empty()) {
             activeBorrowMap.emplace(record.serialNum,&record);
         }

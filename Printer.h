@@ -27,7 +27,7 @@ public:
 
     static void printTableHeader();
 
-    static void printRecordList(const vector<Record>& records,
+    static void printRecordList(const DynArr<Record>& records,
         const unordered_map<string, Item*>& items,
         const unordered_map<int, User>& users,
         int userID=-1);

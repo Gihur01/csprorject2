@@ -22,7 +22,7 @@ string getDate();
 //actual modules
 int handleAddItem(unordered_map<string, Item*>& items);
 int handleAddUser(unordered_map<int, User>& users);
-int handleCheckOutItem(vector<Record>& borrowHistory,
+int handleCheckOutItem(DynArr<Record>& borrowHistory,
     unordered_map<string, Record*>& activeBorrowMap,
     unordered_map<string, Item*>& items,
     unordered_map<int, User>& users);
@@ -30,10 +30,10 @@ int handleCheckOutItem(vector<Record>& borrowHistory,
 int handleCheckInItem(unordered_map<string, Record*>& activeBorrowMap,
     unordered_map<string, Item*>& items);
 
-void handlePrintUserRecords(const vector<Record>& borrowHistory,
+void handlePrintUserRecords(const DynArr<Record>& borrowHistory,
     const unordered_map<string, Item*>& items,
     const unordered_map<int, User>& users);
 
-unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record>& borrowHistory);
+unordered_map<string, Record*> loadActiveBorrowMap(DynArr<Record>& borrowHistory);
 
 #endif //MODULES_H

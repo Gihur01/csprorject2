@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "DynArr.h"
+
 using namespace std;
 
 
@@ -19,8 +21,8 @@ struct Record {
 
 
 
-void saveRecords(const vector<Record>& records);
+void saveRecords(const DynArr<Record>& records);
 
-vector<Record> loadRecords();
+DynArr<Record> loadRecords();
 
 #endif //RECORD_H

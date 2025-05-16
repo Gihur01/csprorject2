@@ -7,17 +7,17 @@
 #include <fstream>
 
 #include "Record.h"
-#include "Item.h"
-#include "User.h"
+#include "DynArr.h"
 
 
 using namespace std;
 
 
-void saveRecords(const vector<Record>& records) {
+void saveRecords(const DynArr<Record>& records) {
     ofstream outFile("recorddb.txt");
 
-    for (const Record& r : records) {
+    for (int i=0;i<records.getLength();i++) {
+        const Record& r=records[i];
         outFile << r.userID << ','
                 << r.serialNum << ','
                 << r.borrowDate << ','
@@ -27,8 +27,8 @@ void saveRecords(const vector<Record>& records) {
     outFile.close();
 }
 
-vector<Record> loadRecords() {
-    vector<Record> borrowHistory;
+DynArr<Record> loadRecords() {
+    DynArr<Record> borrowHistory;
     ifstream inFile("recorddb.txt");
     if (!inFile) {
         return borrowHistory;
@@ -47,7 +47,7 @@ vector<Record> loadRecords() {
         getline(ss, r.borrowDate, ',');
         getline(ss, r.returnDate);
 
-        borrowHistory.push_back(r);
+        borrowHistory.push(r);
     }
 
     inFile.close();

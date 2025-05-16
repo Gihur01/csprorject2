@@ -24,13 +24,13 @@ public:
             pData[i]=theOther.pData[i];
         }
     }
-    int getLength() {
+    int getLength() const {
         return length;
     }
 
 
 
-    void insert(T value) {
+    void push(T value) {
         T* newData= new T[length+1];
         for(int i=0;i<length;i++) {
             newData[i]=pData[i];
@@ -56,7 +56,7 @@ public:
         deleteAt(length);
     }
 
-    void printArr() {
+    void printArr() const {
         try {
             std::cout<<"[";
             for(int i=0;i<length;i++)
@@ -70,7 +70,10 @@ public:
     }
 
     T& last() {
-        return pData[length];
+        return pData[length-1];
+    }
+    T* pLast() {
+        return &(pData[length-1]);
     }
 
     int find(T& value) {
@@ -83,6 +86,9 @@ public:
     }
 
     T& operator[](int index) {
+        return pData[index];
+    }
+    const T& operator[](int index) const {
         return pData[index];
     }
 
