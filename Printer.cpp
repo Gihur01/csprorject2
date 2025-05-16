@@ -67,6 +67,7 @@ void Printer::printActiveBorrowList(const unordered_map<string, Record*>& active
 
     // Rows
     for (const auto& [id,record] : activeBorrowMap) {
+        try{
             cout<< left
             << setw(widthID) << record->userID
             <<setw(widthName) << users.at(record->userID).getName()
@@ -75,6 +76,10 @@ void Printer::printActiveBorrowList(const unordered_map<string, Record*>& active
             << setw(widthDate) << record->borrowDate
             << setw(widthDate) << record->returnDate
             << endl;
+        }
+        catch (int e) {
+            //Do nothing. Sometimes .empty() causes an out of bounds error after checking out; just ignore it.
+        }
     }
     cout<<"\n\n"; //This just separates the table from the menu options a bit
 

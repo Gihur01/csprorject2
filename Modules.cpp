@@ -139,8 +139,8 @@ int handleCheckOutItem(vector<Record>& borrowHistory,
         Record record{userIt->second.getID(),SerialNum,today,""};
         borrowHistory.push_back(record);
 
-        activeBorrowMap[SerialNum]= &borrowHistory.back(); //Adding this new record to activeBorrowMap.
-
+        // activeBorrowMap[SerialNum]; //Adding this new record to activeBorrowMap.
+        activeBorrowMap.emplace(SerialNum,&borrowHistory.back());
 
         // printItemList(items);
 
@@ -245,9 +245,9 @@ void handlePrintUserRecords(const vector<Record>& borrowHistory,
     }
 }
 
-unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record> borrowHistory) {
+unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record>& borrowHistory) {
     unordered_map<std::string, Record*> activeBorrowMap;
-    for(const auto& record :borrowHistory) {
+    for(auto& record :borrowHistory) {
         if(record.returnDate.empty()) {
             activeBorrowMap.emplace(record.serialNum,&record);
         }

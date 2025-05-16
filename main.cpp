@@ -37,23 +37,22 @@ int main() {
     unordered_map<int, User> users=loadUsers(); //stores all users. userID is index (User is simple, so store by value)
         //this loading has the consequence of reading the static variable "userIDCounter" from userdb too.
 
-
     //defining the remaining data structures
     vector<Record> borrowHistory=loadRecords(); //list of all borrow records
     std::unordered_map<std::string, Record*> activeBorrowMap =loadActiveBorrowMap(borrowHistory); //stores all records that are yet to be checked in.
 
     bool continueFlag=true;
 
-    //test values
-    // User u1("john");
-    // User u2("Alice");
-    // Book b1("test1","oliver","1","1900-01-01");
-    // Book b2("test2","eszter","2","2021-04-27");
-
-    // users.emplace(1,u1);
-    // users.emplace(2,u2);
-    // items.emplace("1",&b1);
-    // items.emplace("2",&b2);
+    // test values
+     // User u1("john");
+     // User u2("Alice");
+     // Book b1("book1","oliver","1","1900-01-01");
+     // Book b2("book2","eszter","2","2021-04-27");
+     //
+     // users.emplace(1,u1);
+     // users.emplace(2,u2);
+     // items.emplace("1",&b1);
+     // items.emplace("2",&b2);
 
     //test print
 

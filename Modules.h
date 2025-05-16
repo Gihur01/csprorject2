@@ -34,6 +34,6 @@ void handlePrintUserRecords(const vector<Record>& borrowHistory,
     const unordered_map<string, Item*>& items,
     const unordered_map<int, User>& users);
 
-unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record> borrowHistory);
+unordered_map<std::string, Record*> loadActiveBorrowMap(vector<Record>& borrowHistory);
 
 #endif //MODULES_H
