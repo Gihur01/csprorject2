@@ -26,6 +26,7 @@ public:
     std::string getTitle() const {return title;}
     std::string getAuthor() const {return author;}
     std::string getSerialNum() const {return SerialNum;}
+    std::string getPublishDate() const {return publishDate;}
     bool isAvailable() const {return !isCheckedOut;}
     virtual std::string getFormat(){return "";}
     virtual std::string getType() =0; //gets the type of the current object

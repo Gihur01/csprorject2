@@ -23,9 +23,13 @@ public:
     static const int widthTitle;
     static const int widthDate;
 
-    static const int widthSeparator;
+    static const int widthCheckoutStatus;
 
-    static void printTableHeader();
+    static const int widthSeparatorRecords;
+    static const int widthSeparatorItems;
+    static const int widthSeparatorUsers;
+
+    static void printRecordsHeader();
 
     static void printRecordList(const DynArr<Record>& records,
         const unordered_map<string, Item*>& items,

@@ -52,9 +52,10 @@ int viewsMenu(DynArr<Record>& borrowHistory,
         int choice=readValue<int>();
         switch (choice) {
             case 1:
-                Printer::printUsersList(users);break;
-            case 2:
                 Printer::printItemList(items);break;
+
+            case 2:
+                Printer::printUsersList(users);break;
             case 3:
                 Printer::printRecordList(borrowHistory,items,users);break;
             case 4:
@@ -97,6 +98,7 @@ int main() {
      // items.emplace("1",&b1);
      // items.emplace("2",&b2);
 
+    //main menu
     while(continueFlag) {
         displayMainMenu();
         int choice=readValue<int>();

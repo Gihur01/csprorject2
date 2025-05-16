@@ -15,12 +15,16 @@ using namespace std;
 const int Printer::widthID = 10;
 const int Printer::widthName = 10;
 const int Printer::widthSerial = 15;
-const int Printer::widthTitle = 15;
-const int Printer::widthDate = 15;
+const int Printer::widthTitle = 20;
+const int Printer::widthDate = 20;
 
-const int Printer::widthSeparator= widthID+ widthName+ widthSerial+widthTitle+2*widthDate;
+const int Printer::widthCheckoutStatus=5;
 
-void Printer::printTableHeader() {
+const int Printer::widthSeparatorRecords= widthID+ widthName+ widthSerial+widthTitle+2*widthDate;
+const int Printer::widthSeparatorItems=widthSerial+widthTitle+widthName+widthDate+widthCheckoutStatus;
+const int Printer::widthSeparatorUsers=widthID+widthName;
+
+void Printer::printRecordsHeader() {
     cout<< left
     << setw(widthID) << "User ID"
     << setw(widthName)<< "User name"
@@ -30,7 +34,7 @@ void Printer::printTableHeader() {
     << setw(widthDate) << "Return Date"
     << endl;
 
-    cout << string(widthSeparator, '-') << endl; //horizontal separator
+    cout << string(widthSeparatorRecords, '-') << endl; //horizontal separator
 }
 
 
@@ -39,7 +43,7 @@ void Printer::printRecordList(const DynArr<Record>& records,
     const unordered_map<int, User>& users,
     const int userIDSearchValue) {
 
-    printTableHeader();
+    printRecordsHeader();
 
     // Rows
     for (int i=0;i<records.getLength();i++) {
@@ -65,7 +69,7 @@ void Printer::printActiveBorrowList(const DynArr<Record>& records,
         const unordered_map<string, int>& activeBorrowMap,
         const unordered_map<string, Item*>& items,
         const unordered_map<int, User>& users) {
-    printTableHeader();
+    printRecordsHeader();
 
     // Rows
     for (const auto& [id,index] : activeBorrowMap) {
@@ -88,14 +92,38 @@ void Printer::printActiveBorrowList(const DynArr<Record>& records,
 
 
 void Printer::printUsersList(const unordered_map<int, User>& users) {
+    cout<< left
+    << setw(widthID) << "User ID"
+    << setw(widthName)<< "User name"<<endl
+    << string(widthSeparatorUsers, '-') << endl
+    ;
+
     for(const auto&[id,user]:users) {
-        cout<<id<<": ["<<user.getID()<<","<<user.getName()<<"]"<<", ";
+        cout<< left
+        << setw(widthID) << user.getID()
+        <<setw(widthName) << user.getName()
+        <<endl;
     }
     cout<<endl;
 }
 void Printer::printItemList(const unordered_map<string, Item*>& items) {
+    cout<< left
+    << setw(widthSerial) << "Serial Num"
+    << setw(widthTitle)<< "Title"
+    << setw(widthName)<< "Author"
+    << setw(widthDate)<< "Publish Date"
+    << setw(widthCheckoutStatus)<< "Available"<<endl
+    << string(widthSeparatorItems, '-') << endl
+    ;
     for(const auto&[id,item]:items) {
-        cout<<"["<<id<<", title: "<<item->getTitle()<<", author: "<<item->getAuthor()<<", availability: "<<item->isAvailable()<<"]"<<", "<<endl;
+        string isAvailable=item->isAvailable()? string("Yes"):string("No");
+        cout<< left
+        << setw(widthSerial) << id
+        << setw(widthTitle)<< item->getTitle()
+        << setw(widthName)<< item->getAuthor()
+        << setw(widthDate)<< item->getPublishDate()
+        << setw(widthCheckoutStatus)<< isAvailable
+        <<endl;
     }
     cout<<endl;
 }

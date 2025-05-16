@@ -29,7 +29,6 @@ public:
     }
 
 
-
     void push(T value) {
         T* newData= new T[length+1];
         for(int i=0;i<length;i++) {
@@ -93,6 +92,12 @@ public:
     }
     const T& operator[](int index) const {
         return pData[index];
+    }
+
+    ~DynArr() {
+        delete[] pData;
+        pData=NULL;
+        length=0;
     }
 
 };
