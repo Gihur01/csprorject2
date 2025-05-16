@@ -32,7 +32,8 @@ public:
         const unordered_map<int, User>& users,
         int userID=-1);
 
-    static void printActiveBorrowList(const unordered_map<string, Record*>& activeBorrowMap,
+    static void printActiveBorrowList(const DynArr<Record>& records,
+        const unordered_map<string, int>& activeBorrowMap,
         const unordered_map<string, Item*>& items,
         const unordered_map<int, User>& users);
 

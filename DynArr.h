@@ -41,6 +41,9 @@ public:
         length++;
     }
 
+    //In this project, this function is not used, since we don't delete any record.
+    //However, if we do decide to delete, a friend function needs to be added to update any bound structures.
+        //Bcs e.g. in this project, the activeBorrowMap stores indexes of this array. On deletion, the index changes.
     void deleteAt(int index) {
         T* newData= new T[length-1];
         int j=0;

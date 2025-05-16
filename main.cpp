@@ -15,9 +15,6 @@
 
 using namespace std;
 
-
-
-
 void displayInstructions() {
     cout<<endl
     <<"Please write a number from the list below to use the function!"<<endl
@@ -40,7 +37,7 @@ int main() {
 
     //defining the remaining data structures
     DynArr<Record> borrowHistory=loadRecords(); //list of all borrow records
-    unordered_map<string, Record*> activeBorrowMap =loadActiveBorrowMap(borrowHistory); //stores all records that are yet to be checked in.
+    unordered_map<string, int> activeBorrowMap =loadActiveBorrowMap(borrowHistory); //stores all records that are yet to be checked in. Here, indices of `borrowHistory` is stored.
 
     bool continueFlag=true;
 
@@ -69,7 +66,7 @@ int main() {
                 handleCheckOutItem(borrowHistory,activeBorrowMap,items,users);
                 break;
             case 2:
-                handleCheckInItem(activeBorrowMap,items);
+                handleCheckInItem(borrowHistory,activeBorrowMap,items);
                 break;
             case 3:
                 handleAddUser(users);
@@ -85,7 +82,7 @@ int main() {
                 break;
 
             case 7:
-                Printer::printActiveBorrowList(activeBorrowMap,items,users);
+                Printer::printActiveBorrowList(borrowHistory,activeBorrowMap,items,users);
                 break;
 
             case 8:

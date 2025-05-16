@@ -105,7 +105,7 @@ int handleAddUser(unordered_map<int, User>& users) {
 
 
 int handleCheckOutItem(DynArr<Record>& borrowHistory,
-    unordered_map<string, Record*>& activeBorrowMap,
+    unordered_map<string, int>& activeBorrowMap,
     unordered_map<string, Item*>& items,
     unordered_map<int, User>& users) {
     try {
@@ -141,9 +141,8 @@ int handleCheckOutItem(DynArr<Record>& borrowHistory,
         borrowHistory.push(record);
 
         // activeBorrowMap[SerialNum]; //Adding this new record to activeBorrowMap.
-        Record* temppRecordPointer=borrowHistory.pLast();
-        Record* temp2=borrowHistory.pLast();
-        activeBorrowMap.emplace(SerialNum,temppRecordPointer);
+
+        activeBorrowMap.emplace(SerialNum,borrowHistory.getLength()-1);
 
         // printItemList(items);
 
@@ -167,7 +166,8 @@ int handleCheckOutItem(DynArr<Record>& borrowHistory,
     }
 }
 
-int handleCheckInItem(unordered_map<string, Record*>& activeBorrowMap,
+int handleCheckInItem(DynArr<Record>& borrowHistory,
+    unordered_map<string, int>& activeBorrowMap,
     unordered_map<string, Item*>& items) {
     try{
         string SerialNum=readStr("Please write the serial number: \n");
@@ -188,7 +188,8 @@ int handleCheckInItem(unordered_map<string, Record*>& activeBorrowMap,
         //Find the record without return date
         auto recordIt = activeBorrowMap.find(SerialNum);
         if (recordIt != activeBorrowMap.end()) {
-            recordIt->second->returnDate = today;
+            int index=recordIt->second;
+            borrowHistory[index].returnDate = today;
             activeBorrowMap.erase(recordIt);
         } else {
             throw 2;
@@ -248,12 +249,12 @@ void handlePrintUserRecords(const DynArr<Record>& borrowHistory,
     }
 }
 
-unordered_map<string, Record*> loadActiveBorrowMap(DynArr<Record>& borrowHistory) {
-    unordered_map<string, Record*> activeBorrowMap;
+unordered_map<string, int> loadActiveBorrowMap(DynArr<Record>& borrowHistory) {
+    unordered_map<string, int> activeBorrowMap;
     for (int i=0;i<borrowHistory.getLength();i++) {
         Record& record=borrowHistory[i];
         if(record.returnDate.empty()) {
-            activeBorrowMap.emplace(record.serialNum,&record);
+            activeBorrowMap.emplace(record.serialNum,i);
         }
     }
     return  activeBorrowMap;

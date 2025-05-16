@@ -61,26 +61,23 @@ void Printer::printRecordList(const DynArr<Record>& records,
 }
 
 
-void Printer::printActiveBorrowList(const unordered_map<string, Record*>& activeBorrowMap,
+void Printer::printActiveBorrowList(const DynArr<Record>& records,
+        const unordered_map<string, int>& activeBorrowMap,
         const unordered_map<string, Item*>& items,
         const unordered_map<int, User>& users) {
     printTableHeader();
 
     // Rows
-    for (const auto& [id,record] : activeBorrowMap) {
-        try{
+    for (const auto& [id,index] : activeBorrowMap) {
+        const Record& record=records[index];
             cout<< left
-            << setw(widthID) << record->userID
-            <<setw(widthName) << users.at(record->userID).getName()
-            << setw(widthSerial) << record->serialNum
-            << setw(widthTitle) << items.at(record->serialNum)->getTitle()
-            << setw(widthDate) << record->borrowDate
-            << setw(widthDate) << record->returnDate
+            << setw(widthID) << record.userID
+            <<setw(widthName) << users.at(record.userID).getName()
+            << setw(widthSerial) << record.serialNum
+            << setw(widthTitle) << items.at(record.serialNum)->getTitle()
+            << setw(widthDate) << record.borrowDate
+            << setw(widthDate) << record.returnDate
             << endl;
-        }
-        catch (...) {
-            //Do nothing. Sometimes .empty() causes an out of bounds error after checking out; just ignore it.
-        }
     }
     cout<<"\n\n"; //This just separates the table from the menu options a bit
 
