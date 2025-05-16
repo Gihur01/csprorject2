@@ -15,18 +15,63 @@
 
 using namespace std;
 
-void displayInstructions() {
+void displayMainMenu() {
     cout<<endl
     <<"Please write a number from the list below to use the function!"<<endl
     <<"1: Check out an item"<<endl
     <<"2: Check in an item"<<endl
     <<"3: Add a user"<<endl
     <<"4: Add an item"<<endl
-    <<"5: View all borrow history"<<endl
-    <<"6: View borrow history of a user"<<endl
-    <<"7: View all current checked out items"<<endl
-    <<"8: Exit"<<endl
+    <<"5: Enter views submenu"<<endl
+    <<"6: Save & exit"<<endl
     ;
+}
+
+void displayViewsMenu() {
+    cout<<endl
+    <<"Please select what to view!"<<endl
+    <<"1: View items list"<<endl
+    <<"2: View users list"<<endl
+    <<"3: View all borrow history"<<endl
+    <<"4: View borrow history of a user"<<endl
+    <<"5: View all current checked out items"<<endl
+    <<"6: Back to main menu"<<endl
+    // <<"7: "<<endl
+    // <<"8: "<<endl
+    ;
+}
+
+int viewsMenu(DynArr<Record>& borrowHistory,
+    unordered_map<string, int>& activeBorrowMap,
+    unordered_map<string, Item*>& items,
+    unordered_map<int, User>& users) {
+
+    bool continueFlag=true;
+    while(continueFlag) {
+        displayViewsMenu();
+        int choice=readValue<int>();
+        switch (choice) {
+            case 1:
+                Printer::printUsersList(users);break;
+            case 2:
+                Printer::printItemList(items);break;
+            case 3:
+                Printer::printRecordList(borrowHistory,items,users);break;
+            case 4:
+                handlePrintUserRecords(borrowHistory,items,users);break;
+            case 5:
+                Printer::printActiveBorrowList(borrowHistory,activeBorrowMap,items,users);break;
+            case 6:
+                continueFlag=false;break;
+
+            default:
+                cout<<"Not a valid option. Try again!"<<endl;
+
+        }
+
+    }
+    cout<<endl;
+    return 0;
 }
 
 int main() {
@@ -52,46 +97,26 @@ int main() {
      // items.emplace("1",&b1);
      // items.emplace("2",&b2);
 
-    //test print
-
-    Printer::printUsersList(users);
-    Printer::printItemList(items);
-
-
     while(continueFlag) {
-        displayInstructions();
+        displayMainMenu();
         int choice=readValue<int>();
         switch (choice) {
             case 1:
-                handleCheckOutItem(borrowHistory,activeBorrowMap,items,users);
-                break;
+                handleCheckOutItem(borrowHistory,activeBorrowMap,items,users);break;
             case 2:
-                handleCheckInItem(borrowHistory,activeBorrowMap,items);
-                break;
+                handleCheckInItem(borrowHistory,activeBorrowMap,items);break;
             case 3:
-                handleAddUser(users);
-                break;
+                handleAddUser(users);break;
             case 4:
-                handleAddItem(items);
-                break;
+                handleAddItem(items);break;
             case 5:
-                Printer::printRecordList(borrowHistory,items,users);
-                break;
+                viewsMenu(borrowHistory,activeBorrowMap,items,users);break;
             case 6:
-                handlePrintUserRecords(borrowHistory,items,users);
-                break;
-
-            case 7:
-                Printer::printActiveBorrowList(borrowHistory,activeBorrowMap,items,users);
-                break;
-
-            case 8:
                 continueFlag=false;
                 saveItems(items);
                 saveUsers(users);
                 saveRecords(borrowHistory);
                 cout<<"Goodbye!";
-
                 break;
 
             default:
