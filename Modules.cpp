@@ -76,11 +76,12 @@ int handleAddItem(unordered_map<string, Item*>& items) {
                 break;
         }
 
+        cout<<"the following item has been added: \n";
         item->display();
         items.emplace(serial,item);
 
         //Showing the continue option
-        bool contInput=readYesNo("Do you want to add another item? (y/n)\n");
+        bool contInput=readYesNo("\nDo you want to add another item? (y/n)\n");
         if (!contInput)
             break;
 
@@ -134,6 +135,7 @@ int handleCheckOutItem(DynArr<Record>& borrowHistory,
         }
 
         itemIt->second->checkOut();
+        cout<<"Borrower: "<<userIt->second.getName();
 
         //Getting Today's date
         string today=getDate();
@@ -146,7 +148,7 @@ int handleCheckOutItem(DynArr<Record>& borrowHistory,
 
         // printItemList(items);
 
-        cout<<"Check out success!";
+        cout<<"\nCheck out success!\n";
 
 
         return 0;

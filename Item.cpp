@@ -48,7 +48,7 @@ EBook::EBook(std::string t, std::string a, std::string s,  std::string d, std::s
 }
 
 void EBook::display() const  {
-    std::cout << "EBook: " << title << " by " << author << " (Format: " << fileFormat << ")\n";
+    std::cout << "EBook: " << title << " by " << author << " (ISBN: "<<SerialNum<<" Format: " << fileFormat << ")\n";
 }
 
 Magazine::Magazine(std::string t, std::string a, std::string s,  std::string d)
@@ -57,7 +57,7 @@ Magazine::Magazine(std::string t, std::string a, std::string s,  std::string d)
 
 
 void Magazine::display() const  {
-    std::cout << "Magazine: " << title << " by " << author << "\n";
+    std::cout << "Magazine: " << title << " by " << author<< " (ISSN: "<<SerialNum<< ")\n";
 }
 
 
@@ -72,12 +72,14 @@ void saveItems(const std::unordered_map<std::string, Item*>& items) {
             outFile << "Book," << item->getSerialNum() << ","
             << item->getTitle()<< ","
             << item->getAuthor() << ","
+            << item->getPublishDate() << ","
             << item->isAvailable() << std::endl;
         }
         else if (item->getType()=="EBook") {
             outFile << "EBook," << item->getSerialNum() << ","
             << item->getTitle()<< ","
             << item->getAuthor() << ","
+            << item->getPublishDate() << ","
             << item->getFormat()<< ","
             << item->isAvailable() << std::endl;
         }
@@ -85,6 +87,7 @@ void saveItems(const std::unordered_map<std::string, Item*>& items) {
             outFile << "Magazine," << item->getSerialNum() << ","
             << item->getTitle()<< ","
             << item->getAuthor() << ","
+            << item->getPublishDate() << ","
             << item->isAvailable() << std::endl;
         }
     }
@@ -109,6 +112,7 @@ std::unordered_map<std::string, Item*> loadItems() {
         std::getline(ss, serial, ',');
         std::getline(ss, title, ',');
         std::getline(ss, author, ',');
+        std::getline(ss, publishDate, ',');
 
         if (type == "Book") {
             std::getline(ss, availableStr);

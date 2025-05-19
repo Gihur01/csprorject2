@@ -13,7 +13,7 @@
 using namespace std;
 
 const int Printer::widthID = 10;
-const int Printer::widthName = 10;
+const int Printer::widthName = 15;
 const int Printer::widthSerial = 15;
 const int Printer::widthTitle = 20;
 const int Printer::widthDate = 20;
